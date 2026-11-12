@@ -262,8 +262,7 @@ sanity(fitbb)
 ok <- all(unlist(sanity(fitbb)))
 
 if (!ok) {
-  # if (!exists("fit")) {
-  fit <- NULL
+  fitbb <- NULL
 } else {
   saveRDS(fitbb, file = paste0("data-generated/fit-intonly", model, ".rds"))
 }
