@@ -284,8 +284,8 @@ crit_val <- qnorm(0.975) # 1.96 for a standard normal distribution
 link_lower <- preds$fit - crit_val * preds$se.fit
 link_upper <- preds$fit + crit_val * preds$se.fit
 newdata$pred_response <- test$family$linkinv(preds$fit)
-newdata$ci_lower <- test$family$linkinv(link_upper)
-newdata$ci_upper <- test$family$linkinv(link_lower)
+newdata$ci_lower <- test$family$linkinv(link_lower)
+newdata$ci_upper <- test$family$linkinv(link_upper)
 newdata # females length and season
 
 
@@ -300,8 +300,8 @@ crit_val <- qnorm(0.975) # 1.96 for a standard normal distribution
 link_lower <- preds$fit - crit_val * preds$se.fit
 link_upper <- preds$fit + crit_val * preds$se.fit
 newdata$pred_response <- test_m$family$linkinv(preds$fit)
-newdata$ci_lower <- test_m$family$linkinv(link_upper)
-newdata$ci_upper <- test_m$family$linkinv(link_lower)
+newdata$ci_lower <- test_m$family$linkinv(link_lower)
+newdata$ci_upper <- test_m$family$linkinv(link_upper)
 
 
 # females and season for different hooks (HBLL versus Dog)
@@ -321,8 +321,8 @@ crit_val <- qnorm(0.975) # 1.96 for a standard normal distribution
 link_lower <- preds$fit - crit_val * preds$se.fit
 link_upper <- preds$fit + crit_val * preds$se.fit
 newdata$pred_response <- test$family$linkinv(preds$fit)
-newdata$ci_lower <- test$family$linkinv(link_upper)
-newdata$ci_upper <- test$family$linkinv(link_lower)
+newdata$ci_lower <- test$family$linkinv(link_lower)
+newdata$ci_upper <- test$family$linkinv(link_upper)
 newdata
 
 
@@ -343,8 +343,8 @@ crit_val <- qnorm(0.975) # 1.96 for a standard normal distribution
 link_lower <- preds$fit - crit_val * preds$se.fit
 link_upper <- preds$fit + crit_val * preds$se.fit
 newdata$pred_response <- test$family$linkinv(preds$fit)
-newdata$ci_lower <- test$family$linkinv(link_upper)
-newdata$ci_upper <- test$family$linkinv(link_lower)
+newdata$ci_lower <- test$family$linkinv(link_lower)
+newdata$ci_upper <- test$family$linkinv(link_upper)
 newdata
 
 
