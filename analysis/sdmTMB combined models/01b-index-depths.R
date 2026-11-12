@@ -64,13 +64,13 @@ grid <- purrr::map_dfr(years, ~ tibble(grid, year = .x))
 gridshallow <- filter(grid, depth_bin == 1)
 griddeep <- filter(grid, depth_bin == 2)
 
-meshsh <- make_survey_mesh(dsh, gridshallow, max_edge = 6)
+meshsh <- make_survey_mesh(dsh, gridshallow)
 plot(meshsh)
 
 ddp <- filter(d, depth_bin == 2)
 griddeep <- filter(grid, depth_bin == 2)
 
-meshdp <- make_survey_mesh(ddp, griddeep, max_edge = 6)
+meshdp <- make_survey_mesh(ddp, griddeep)
 plot(meshdp)
 
 ms <- sdmTMB(

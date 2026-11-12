@@ -3,10 +3,9 @@ library(tidyverse)
 library(sdmTMB)
 source("analysis/sdmTMB combined models/utils-mesh.R")
 
-# choose model
-model = "hblldog" #hbll and circle and j hook
-# model = "hbll-n-s" #hbll
-# model <- "dog-j-circle" # circle and j hook sog surveys
+
+# models to run; each is fit, saved, and indexed in turn
+models <- c("hblldog", "hbll-n-s", "dog-j-circle")
 
 
 grid_dog <- gfplot::dogfish_grid$grid %>%
@@ -46,8 +45,9 @@ df$catch_prop <- df$catch_count / df$lglsp_hook_count
 # keeps the RW SD off zero: median 0.3, 95% interval about 0.11 to 0.8
 sigma_v_prior <- lognormal_prior(log(0.3), 0.5)
 
-max_edge <- 7 # km; inner mesh edge length, see fig-mesh-options.R
 
+for (model in models) {
+message("Running model: ", model)
 if (model == "hblldog") {
   d <- df
   sort(unique(d$year))
@@ -130,7 +130,7 @@ if (model == "dog-j-circle") {
 # index generation--------
 
 
-mesh <- make_survey_mesh(d, grid, max_edge = max_edge)
+mesh <- make_survey_mesh(d, grid)
 plot(mesh)
 mesh$mesh$n
 
@@ -255,21 +255,19 @@ sanity(fitbb)
 ok <- all(unlist(sanity(fitbb)))
 
 if (!ok) {
-  fitbb <- NULL
-} else {
-  fitbb |> strip_sdmTMB() |>
-    saveRDS(file = paste0("data-generated/fit-intonly", model, ".rds"))
+  warning("sanity() checks failed for model ", model, "; skipping save and index")
+  next
 }
+fitbb |> strip_sdmTMB() |>
+  saveRDS(file = paste0("data-generated/fit-intonly", model, ".rds"))
 
 # get index
-if (!is.null(fitbb)) {
-  index <- get_index(fitbb, newdata = grid, offset = rep(0, nrow(grid)),
-    derived_link = "log", bias_correct = TRUE)
-  index <- index |> mutate(model = ifelse(year %in% unique(d$year), "yrs_surved", "yrs_interp"))
-  index$modelloc <- model
-  index$type <- "int"
-  saveRDS(index, file = paste0("data-generated/ind-sog-intonly", model, ".rds"))
-}
+index <- get_index(fitbb, newdata = grid, offset = rep(0, nrow(grid)),
+  derived_link = "log", bias_correct = TRUE)
+index <- index |> mutate(model = ifelse(year %in% unique(d$year), "yrs_surved", "yrs_interp"))
+index$modelloc <- model
+index$type <- "int"
+saveRDS(index, file = paste0("data-generated/ind-sog-intonly", model, ".rds"))
 
 ggplot(index, aes(as.factor(year), (est), ymin = (lwr), ymax = (upr))) +
   geom_pointrange(position = position_dodge(width = 0.25)) +
@@ -278,3 +276,4 @@ ggplot(index, aes(as.factor(year), (est), ymin = (lwr), ymax = (upr))) +
 ggplot(filter(index, model == "yrs_surved"), aes(as.factor(year), (est), ymin = (lwr), ymax = (upr))) +
   geom_pointrange(position = position_dodge(width = 0.25)) +
   theme_classic()
+}
