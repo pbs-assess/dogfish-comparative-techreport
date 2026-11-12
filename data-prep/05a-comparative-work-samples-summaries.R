@@ -353,7 +353,6 @@ newdata
 # hbll two depths compared to dogfish survey
 
 comp$sex <- as.factor(comp$sex)
-comp <- comp |> as.factor(comp$season)
 comp$season <- as.factor(comp$season)
 levels(comp$sex) <- c("male", "female")
 levels(comp$season) <- c("summer", "fall")
