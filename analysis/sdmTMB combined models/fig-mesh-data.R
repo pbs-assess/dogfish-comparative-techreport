@@ -29,4 +29,4 @@ cv2 <- cowplot::plot_grid(
 )
 cv2
 
-ggsave(paste0("figures/mesh_points.png"), cv2, height = 10, width = 7, dpi = 200)
+ggplot2::ggsave(paste0("figures/mesh_points.png"), cv2, height = 10, width = 7, dpi = 200)
