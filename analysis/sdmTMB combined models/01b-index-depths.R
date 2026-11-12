@@ -111,7 +111,7 @@ ms$sd_report
 md$sd_report
 
 
-psh <- predict(ms, newdata = gridshallow, se_fit = TRUE, re_form = NA, return_tmb_object = TRUE)
+psh <- predict(ms, newdata = gridshallow, return_tmb_object = TRUE)
 index <- get_index(psh, bias_correct = TRUE)
 index$loc <- "shallow"
 index <- index |>
