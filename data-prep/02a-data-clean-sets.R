@@ -181,7 +181,9 @@ range(final$soak)
 filter(final, is.na(soak) == TRUE) |> tally()
 
 #final <- final |> mutate(cpue = catch_count / (lglsp_hook_count * soak))
-# final <- filter(final, usability_code != 0) #usability_code filters out the comparison sets
+# keep usable sets (1, 17) and the comparison sets (0); drops FAIL (5),
+# closed-area (28) and test (23) sets, including both overnight soaks
+final <- filter(final, usability_code %in% c(0, 1, 17))
 final <- filter(final, lglsp_hook_count != 0)
 
 final$offset_hksoak <- log(final$lglsp_hook_count * final$soak) # nas created, thats ok
