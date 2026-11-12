@@ -1,3 +1,4 @@
+library(tidyverse)
 d <- readRDS("data-raw/wrangled-hbll-dog-sets.rds")
 glimpse(d)
 d <- d |> mutate(deployed = as.Date(time_deployed))

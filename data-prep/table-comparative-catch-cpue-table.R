@@ -1,3 +1,4 @@
+library(tidyverse)
 # outputs for manuscript
 
 final <- readRDS("data-raw/wrangled-hbll-dog-sets.rds") # no west coast VI expansion set
