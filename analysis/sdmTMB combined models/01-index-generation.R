@@ -1,6 +1,7 @@
 library(ggplot2)
 library(tidyverse)
 library(sdmTMB)
+source("analysis/sdmTMB combined models/utils-mesh.R")
 
 # choose model
 model = "hblldog" #hbll and circle and j hook
@@ -35,7 +36,7 @@ df$log_botdepth2 <- df$log_botdepth * df$log_botdepth
 df$catch_prop <- df$catch_count / (df$lglsp_hook_count * df$soak)
 df$catch_prop_hbll <- df$catch_count / df$lglsp_hook_count
 
-cutoff <- 5
+max_edge <- 6 # km; inner mesh edge length, see fig-mesh-options.R
 
 if (model == "hblldog") {
   d <- df
@@ -138,7 +139,7 @@ if (model == "dog-j-circle") {
 # index generation--------
 
 
-mesh <- make_mesh(d, c("UTM.lon", "UTM.lat"), cutoff = cutoff)
+mesh <- make_survey_mesh(d, grid, max_edge = max_edge)
 plot(mesh)
 mesh$mesh$n
 

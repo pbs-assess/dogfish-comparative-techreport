@@ -1,7 +1,7 @@
 library(sdmTMB)
 library(ggplot2)
 library(tidyverse)
-library(sdmTMB)
+source("analysis/sdmTMB combined models/utils-mesh.R")
 
 df <- readRDS("data-raw/wrangled-hbll-dog-sets.rds") |>
   drop_na(catch_count) |>
@@ -61,14 +61,14 @@ grid <- purrr::map_dfr(years, ~ tibble(grid, year = .x))
 gridshallow <- filter(grid, depth_bin == 1)
 griddeep <- filter(grid, depth_bin == 2)
 
-meshsh <- make_mesh(dsh, c("UTM.lon", "UTM.lat"), cutoff = 10)
+meshsh <- make_survey_mesh(dsh, gridshallow, max_edge = 6)
 plot(meshsh)
 
 ddp <- filter(d, depth_bin == 2)
 griddeep <- filter(grid, depth_bin == 2)
 weightsd <- (ddp$lglsp_hook_count)
 
-meshdp <- make_mesh(ddp, c("UTM.lon", "UTM.lat"), cutoff = 5)
+meshdp <- make_survey_mesh(ddp, griddeep, max_edge = 6)
 plot(meshdp)
 
 ms <- sdmTMB(
