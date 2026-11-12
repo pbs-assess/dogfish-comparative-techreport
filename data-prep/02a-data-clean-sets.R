@@ -116,8 +116,11 @@ sets |>
   group_by(year) |>
   tally() # lots of 2005s missing too soak time should have been consistently 2 hours at this time, the time_end_deployment was not recorded in 2005
 
-# 2005 was two hour soak so I am going to add that in
-sets <- sets |> mutate(soak = ifelse(is.na(duration_min) == TRUE, 60, duration_min))
+# 2005 was two hour soak so I am going to add that in (120 min protocol)
+sets <- sets |> mutate(soak = ifelse(is.na(duration_min) == TRUE, 120, duration_min))
+# 2004 Northumberland Channel set: depth is NA in the typed vector above, so it
+# misses the join; soak of 84 min from the 2005 tech report
+sets <- sets |> mutate(soak = ifelse(fishing_event_id == 5490376, 84, soak))
 
 # sets <- sets |>
 #   mutate(
