@@ -257,7 +257,8 @@ ok <- all(unlist(sanity(fitbb)))
 if (!ok) {
   fitbb <- NULL
 } else {
-  saveRDS(fitbb, file = paste0("data-generated/fit-intonly", model, ".rds"))
+  fitbb |> strip_sdmTMB() |>
+    saveRDS(file = paste0("data-generated/fit-intonly", model, ".rds"))
 }
 
 # get index

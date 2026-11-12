@@ -99,7 +99,8 @@ ms <- sdmTMB(
   extra_time = seq(min(dsh$year), max(dsh$year))
 )
 
-saveRDS(ms, "output/fit-depth-bins-shallow.rds")
+ms |> strip_sdmTMB() |>
+  saveRDS("output/fit-depth-bins-shallow.rds")
 ms <- readRDS("output/fit-depth-bins-shallow.rds")
 
 md <- sdmTMB(
@@ -127,7 +128,8 @@ md <- sdmTMB(
   do_index = FALSE,
   extra_time = seq(min(ddp$year), max(ddp$year))
 )
-saveRDS(md, "output/fit-depth-bins-deep.rds")
+md |> strip_sdmTMB() |>
+  saveRDS("output/fit-depth-bins-deep.rds")
 md <- readRDS("output/fit-depth-bins-deep.rds")
 
 sanity(ms)
