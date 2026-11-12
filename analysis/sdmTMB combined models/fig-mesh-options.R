@@ -13,7 +13,7 @@ dir.create("figures", showWarnings = FALSE)
 max_edges <- c(8, 6, 5) # km; inner max.edge options to compare
 outer_edge <- 30 # km; max.edge in the outer extension
 
-# data and grids (as in 01c-index-rw0-iid.R) ---------------------------------
+# data and grids (as in 01-index-generation.R) -------------------------------
 
 df <- readRDS("data-raw/wrangled-hbll-dog-sets.rds") |>
   drop_na(catch_count, offset, julian, soak, lglsp_hook_count)
