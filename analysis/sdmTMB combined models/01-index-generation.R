@@ -163,14 +163,6 @@ g <-
 g
 saveRDS(g, paste0("figures/sog-model-mesh-", model, ".rds"))
 
-year_range <- range(d$year)
-all_years <- data.frame(year = year_range[1]:year_range[2])
-missing_years <- anti_join(all_years, d, by = "year") %>%
-  select(year) %>%
-  unique()
-extratime <- missing_years$year
-
-if (length(extratime) == 0L) extratime <- NULL
 
 ggplot() +
   geom_point(
@@ -252,7 +244,7 @@ fitbb <- sdmTMB(
     matern_st = pc_matern(range_gt = 10, sigma_lt = 2),
     sigma_V = sigma_v_prior
   ),
-  extra_time = extratime,
+  extra_time = seq(min(d$year), max(d$year)), # sdmTMB skips years in the data
   control = sdmTMBcontrol(multiphase = FALSE, collapse_spatial_variance = TRUE)
 )
 

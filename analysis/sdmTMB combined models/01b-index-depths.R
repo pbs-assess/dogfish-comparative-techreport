@@ -96,7 +96,7 @@ ms <- sdmTMB(
   mesh = meshsh,
   data = dsh,
   do_index = FALSE,
-  extra_time = c(2006, 2017, 2020)
+  extra_time = seq(min(dsh$year), max(dsh$year))
 )
 
 saveRDS(ms, "output/fit-depth-bins-shallow.rds")
@@ -125,7 +125,7 @@ md <- sdmTMB(
   mesh = meshdp,
   data = ddp,
   do_index = FALSE,
-  extra_time = c(2006, 2017, 2020)
+  extra_time = seq(min(ddp$year), max(ddp$year))
 )
 saveRDS(md, "output/fit-depth-bins-deep.rds")
 md <- readRDS("output/fit-depth-bins-deep.rds")
