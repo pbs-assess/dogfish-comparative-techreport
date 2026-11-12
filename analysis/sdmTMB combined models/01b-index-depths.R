@@ -111,21 +111,19 @@ ms$sd_report
 md$sd_report
 
 
-psh <- predict(ms, newdata = gridshallow, return_tmb_object = TRUE)
-index <- get_index(psh, bias_correct = TRUE)
+index <- get_index(ms, newdata = gridshallow, bias_correct = TRUE)
 index$loc <- "shallow"
 index <- index |>
   mutate(mean = mean(est), meanlwr = mean(lwr), meanupr = mean(upr))
 
-saveRDS(psh, paste0("output/ind-depth-bin-shallow.rds"))
+saveRDS(index, "output/ind-depth-bin-shallow.rds")
 
-pdeep <- predict(md, newdata = griddeep, response = TRUE, return_tmb_object = TRUE)
-index_d <- get_index(pdeep, bias_correct = TRUE)
+index_d <- get_index(md, newdata = griddeep, bias_correct = TRUE)
 index_d$loc <- "deep"
 index_d <- index_d |>
   mutate(mean = mean(est), meanlwr = mean(lwr), meanupr = mean(upr))
 
-saveRDS(pdeep, paste0("output/ind-depth-bin-deep.rds"))
+saveRDS(index_d, "output/ind-depth-bin-deep.rds")
 
 index2 <- bind_rows(index, index_d)
 

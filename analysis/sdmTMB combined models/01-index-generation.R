@@ -269,8 +269,7 @@ if (!ok) {
 
 # get index
 if (!is.null(fitbb)) {
-  pred <- predict(fitbb, grid, return_tmb_object = TRUE, response = TRUE)
-  index <- get_index(pred, bias_correct = TRUE)
+  index <- get_index(fitbb, newdata = grid, bias_correct = TRUE)
   index <- index |> mutate(model = ifelse(year %in% unique(d$year), "yrs_surved", "yrs_interp"))
   index$modelloc <- model
   index$type <- "int"
