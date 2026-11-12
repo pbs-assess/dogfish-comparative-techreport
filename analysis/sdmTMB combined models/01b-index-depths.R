@@ -36,7 +36,11 @@ d <- d |> #4 points are deeper than 110, instead of dropping ill change the cate
     depth_m <= 70 ~ 1,
     depth_m > 70 & depth_m <= 150 ~ 2))
 
-family = betabinomial(link = "cloglog")
+# Same model as 01-index-generation.R: beta-binomial with hooks as trials,
+# cloglog link, offset = log(soak); rw0 year intercept, IID spatiotemporal
+# fields and a spatial field, with PC priors on the fields.
+family <- betabinomial(link = "cloglog")
+sigma_v_prior <- lognormal_prior(log(0.3), 0.5)
 
 
 
@@ -53,7 +57,6 @@ d$year_factor <- as.factor(d$year)
 d$catch_prop <- d$catch_count/d$lglsp_hook_count
 
 dsh <- filter(d, depth_bin == 1)
-weights <- (dsh$lglsp_hook_count * dsh$soak)
 
 source("analysis/999-load-hbll-n-s-grid.R") #this is the hbll n, s grid from gfdata
 years <- seq(min(d$year), max(d$year), 1)
@@ -66,20 +69,30 @@ plot(meshsh)
 
 ddp <- filter(d, depth_bin == 2)
 griddeep <- filter(grid, depth_bin == 2)
-weightsd <- (ddp$lglsp_hook_count)
 
 meshdp <- make_survey_mesh(ddp, griddeep, max_edge = 6)
 plot(meshdp)
 
 ms <- sdmTMB(
-  formula = catch_prop ~1 ,
+  formula = catch_prop ~ 1,
   time = "year",
-  spatiotemporal = "rw",
-  weights = weights,
+  spatiotemporal = "iid",
+  time_varying = ~1,
+  time_varying_type = "rw0",
+  weights = dsh$lglsp_hook_count,
+  offset = log(dsh$soak),
   silent = FALSE,
   spatial = "on",
-  family = betabinomial(),
-  priors = index_priors(),
+  share_range = TRUE,
+  family = family,
+  priors = sdmTMBpriors(
+    # PC priors on the Matern fields: P(range < 10 km) = 0.05 keeps the range
+    # off scales the mesh can't represent; P(SD > 2) = 0.05 is weakly informative
+    matern_s = pc_matern(range_gt = 10, sigma_lt = 2),
+    matern_st = pc_matern(range_gt = 10, sigma_lt = 2),
+    sigma_V = sigma_v_prior
+  ),
+  control = sdmTMBcontrol(collapse_spatial_variance = TRUE, multiphase = FALSE),
   mesh = meshsh,
   data = dsh,
   do_index = FALSE,
@@ -91,14 +104,24 @@ ms <- readRDS("output/fit-depth-bins-shallow.rds")
 
 md <- sdmTMB(
   formula = catch_prop ~ 1,
-  #offset = "offset",
   time = "year",
-  weights = weightsd,
-  spatiotemporal = "rw",
+  spatiotemporal = "iid",
+  time_varying = ~1,
+  time_varying_type = "rw0",
+  weights = ddp$lglsp_hook_count,
+  offset = log(ddp$soak),
   silent = FALSE,
   spatial = "on",
-  family = betabinomial(),
-  priors = index_priors(),
+  share_range = TRUE,
+  family = family,
+  priors = sdmTMBpriors(
+    # PC priors on the Matern fields: P(range < 10 km) = 0.05 keeps the range
+    # off scales the mesh can't represent; P(SD > 2) = 0.05 is weakly informative
+    matern_s = pc_matern(range_gt = 10, sigma_lt = 2),
+    matern_st = pc_matern(range_gt = 10, sigma_lt = 2),
+    sigma_V = sigma_v_prior
+  ),
+  control = sdmTMBcontrol(collapse_spatial_variance = TRUE, multiphase = FALSE),
   mesh = meshdp,
   data = ddp,
   do_index = FALSE,
@@ -113,14 +136,16 @@ ms$sd_report
 md$sd_report
 
 
-index <- get_index(ms, newdata = gridshallow, bias_correct = TRUE)
+index <- get_index(ms, newdata = gridshallow, offset = rep(0, nrow(gridshallow)),
+  derived_link = "log", bias_correct = TRUE)
 index$loc <- "shallow"
 index <- index |>
   mutate(mean = mean(est), meanlwr = mean(lwr), meanupr = mean(upr))
 
 saveRDS(index, "output/ind-depth-bin-shallow.rds")
 
-index_d <- get_index(md, newdata = griddeep, bias_correct = TRUE)
+index_d <- get_index(md, newdata = griddeep, offset = rep(0, nrow(griddeep)),
+  derived_link = "log", bias_correct = TRUE)
 index_d$loc <- "deep"
 index_d <- index_d |>
   mutate(mean = mean(est), meanlwr = mean(lwr), meanupr = mean(upr))

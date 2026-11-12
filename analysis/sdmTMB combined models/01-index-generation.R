@@ -33,10 +33,20 @@ df <- readRDS("data-raw/wrangled-hbll-dog-sets.rds") |>
   filter(soak < 1000) #not sure what happened but that seems very high so removing
 
 df$log_botdepth2 <- df$log_botdepth * df$log_botdepth
-df$catch_prop <- df$catch_count / (df$lglsp_hook_count * df$soak)
-df$catch_prop_hbll <- df$catch_count / df$lglsp_hook_count
+# Likelihood: beta-binomial with hooks as trials, cloglog link and
+# offset = log(soak), so exp(eta) is a catch rate per hook-minute and the
+# cloglog builds in hook saturation (at most one fish per hook). The index sums
+# that rate over the grid (derived_link = "log") at offset 0.
+#
+# Time structure: year intercept as a random walk with the first year fixed at
+# the intercept ("rw0"), IID spatiotemporal fields, and a spatial field.
+# survey_lumped enters as a factor alongside the intercept, which "rw0" allows.
+df$catch_prop <- df$catch_count / df$lglsp_hook_count
 
-max_edge <- 6 # km; inner mesh edge length, see fig-mesh-options.R
+# keeps the RW SD off zero: median 0.3, 95% interval about 0.11 to 0.8
+sigma_v_prior <- lognormal_prior(log(0.3), 0.5)
+
+max_edge <- 7 # km; inner mesh edge length, see fig-mesh-options.R
 
 if (model == "hblldog") {
   d <- df
@@ -60,18 +70,12 @@ if (model == "hblldog") {
     geom_point() +
     facet_wrap(~survey_sep)
 
-  family <- betabinomial(link = "logit")
-
   grid <- grid_hbll
   grid <- purrr::map_dfr(years, ~ tibble(grid, year = .x))
   grid$julian_c <- 0
   grid$survey_lumped <- "hbll"
 
-  weight <- (d$lglsp_hook_count * d$soak)
-  formulanb <- catch_count ~ 1 + as.factor(survey_lumped) + s(julian_c)
   formulabb <- catch_prop ~ 1 + as.factor(survey_lumped) + s(julian_c)
-
-  spatial <- "off"
 }
 
 if (model == "hbll-n-s") {
@@ -85,18 +89,12 @@ if (model == "hbll-n-s") {
   meanj <- mean(d$julian)
   d$julian_c <- d$julian - meanj
 
-  weight <- (d$lglsp_hook_count)
-
   years <- seq(min(d$year), max(d$year), 1)
   grid <- grid_hbll
   grid <- purrr::map_dfr(years, ~ tibble(grid, year = .x))
   grid$julian_c <- 0
 
-  formulabb <- catch_prop_hbll ~ 1
-  # formula <- catch_count ~ 1
-  family <- betabinomial()
-
-  spatial = "on"
+  formulabb <- catch_prop ~ 1
 }
 
 if (model == "dog-j-circle") {
@@ -125,14 +123,7 @@ if (model == "dog-j-circle") {
   grid_dog$survey_lumped <- "dog"
   grid <- grid_dog
 
-  weight <- (d$lglsp_hook_count * d$soak)
-  years <- seq(min(d$year), max(d$year), 1)
-
-  spatial <- "off"
-
-  # formula <- catch_count ~ 1 + s(julian_c)
   formulabb <- catch_prop ~ 1 + as.factor(survey_lumped)
-  family <- betabinomial()
 }
 
 
@@ -142,7 +133,6 @@ if (model == "dog-j-circle") {
 mesh <- make_survey_mesh(d, grid, max_edge = max_edge)
 plot(mesh)
 mesh$mesh$n
-
 
 g <-
   ggplot() +
@@ -246,15 +236,24 @@ fitbb <- sdmTMB(
   data = d,
   time = "year",
   mesh = mesh,
-  spatial = spatial,
-  spatiotemporal = "rw",
-  weights = weight,
-  family = betabinomial(),
-  silent = TRUE,
-  share_range = FALSE,
-  priors = index_priors(),
+  spatial = "on",
+  spatiotemporal = "iid",
+  time_varying = ~1,
+  time_varying_type = "rw0",
+  weights = d$lglsp_hook_count, # trials = hooks
+  offset = log(d$soak), # exposure per hook
+  family = betabinomial(link = "cloglog"),
+  silent = FALSE,
+  share_range = TRUE, # weren't that different before; simpler model
+  priors = sdmTMBpriors(
+    # PC priors on the Matern fields: P(range < 10 km) = 0.05 keeps the range
+    # off scales the mesh can't represent; P(SD > 2) = 0.05 is weakly informative
+    matern_s = pc_matern(range_gt = 10, sigma_lt = 2),
+    matern_st = pc_matern(range_gt = 10, sigma_lt = 2),
+    sigma_V = sigma_v_prior
+  ),
   extra_time = extratime,
-  control = sdmTMBcontrol(newton_loops = 1L)
+  control = sdmTMBcontrol(multiphase = FALSE, collapse_spatial_variance = TRUE)
 )
 
 AIC(fitbb)
@@ -271,7 +270,8 @@ if (!ok) {
 
 # get index
 if (!is.null(fitbb)) {
-  index <- get_index(fitbb, newdata = grid, bias_correct = TRUE)
+  index <- get_index(fitbb, newdata = grid, offset = rep(0, nrow(grid)),
+    derived_link = "log", bias_correct = TRUE)
   index <- index |> mutate(model = ifelse(year %in% unique(d$year), "yrs_surved", "yrs_interp"))
   index$modelloc <- model
   index$type <- "int"
