@@ -20,7 +20,7 @@ paired <- final |>
   dplyr::select(fishing_event_id, catch_count, year, hooksize_desc, offset, survey_abbrev) |>
   filter(year != 2019) |>
   mutate(hook_name = ifelse(hooksize_desc == "13/0", "HBLL 13/0", "Dog 14/0")) |>
-  mutate(cpue = catch_count / offset) |>
+  mutate(cpue = catch_count / exp(offset)) |> # offset = log(hooks)
   dplyr::select(-c(catch_count, year, offset, hooksize_desc))
 
 
