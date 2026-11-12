@@ -174,7 +174,10 @@ AIC(intbb)
 #<- not reproducible, check order of params
 tidy(mdepthbb, ran.pars = TRUE)
 
-table <- data.frame("Depth (m)" = c(">220 m", "111-165 m", "166-220 m", "56-110 m"))
+# labels from the term names so they follow the fitted parameter order
+depth_lab <- trimws(sub("factor(depth_bin)", "", tidy(mdepthbb)$term, fixed = TRUE))
+depth_lab <- gsub(" - ", "-", sub("^> ", ">", depth_lab)) # e.g. "56-110 m", ">220 m"
+table <- data.frame("Depth (m)" = depth_lab)
 table <- table |> mutate(rho = round(exp(tidy(mdepthbb, ran.pars = TRUE)$estimate), 2))
 
 table <- table |> mutate(conf.low = round(exp(tidy(mdepthbb, ran.pars = TRUE)$conf.low), 2))
@@ -198,7 +201,7 @@ table |>
     format = "latex",
     col.names = c(
       "Data",
-      "Length bin (cm)", "rho (CI)"
+      "Depth (m)", "rho (CI)"
     ),
     booktabs = TRUE,
     align = "c",
