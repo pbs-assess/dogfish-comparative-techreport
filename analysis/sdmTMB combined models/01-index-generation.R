@@ -252,6 +252,7 @@ fitbb <- sdmTMB(
   family = betabinomial(),
   silent = TRUE,
   share_range = FALSE,
+  priors = index_priors(),
   extra_time = extratime,
   control = sdmTMBcontrol(newton_loops = 1L)
 )

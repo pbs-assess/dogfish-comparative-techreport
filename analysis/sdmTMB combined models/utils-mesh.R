@@ -40,3 +40,16 @@ mesh_edge_summary <- function(mesh, d, xy_cols = c("UTM.lon", "UTM.lat")) {
     edge_q90 = unname(quantile(e, 0.9)), edge_max = max(e))
 }
 
+# PC priors on the spatial and spatiotemporal Matern fields, matched to the
+# mesh: P(range < range_gt) = 0.05 keeps the range off scales the mesh can't
+# represent (inner max.edge 6 km resolves ranges of roughly 15-20 km and up),
+# and P(sigma > sigma_lt) = 0.05 is weakly informative on the link scale.
+# Extra priors (e.g. sigma_V) pass through `...`. Priors on fields that are
+# off are ignored.
+index_priors <- function(range_gt = 10, sigma_lt = 2, ...) {
+  sdmTMB::sdmTMBpriors(
+    matern_s = sdmTMB::pc_matern(range_gt = range_gt, sigma_lt = sigma_lt),
+    matern_st = sdmTMB::pc_matern(range_gt = range_gt, sigma_lt = sigma_lt),
+    ...
+  )
+}
