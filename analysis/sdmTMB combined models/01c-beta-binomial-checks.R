@@ -43,7 +43,7 @@ d <- fitbb$data
 
 # DHARMa residuals-----------
 set.seed(1)
-s_bb <- simulate(fitbb, nsim = 300, type = "mle-mvn")
+s_bb <- simulate(fitbb, nsim = 500, type = "mle-mvn")
 max(s_bb) # bounded by the hooks (or 1 if simulated as proportions)
 
 qq <- dharma_residuals(s_bb, object = fitbb, plot = FALSE)
@@ -90,9 +90,12 @@ rates |>
   print()
 }
 
-# one figure: QQ (left) and dispersion (right) for each model---------
-pdf("figures/dharma-checks.pdf", width = 7, height = 6)
-par(mfrow = c(length(models), 3), mar = c(3.4, 3.4, 2, 0.8), mgp = c(2.1, 0.6, 0), cex = 0.7)
+# one figure: QQ residuals only by default; the dispersion and residuals vs.
+# fitted panels are still computed above and can be added back with this flag
+show_all_panels <- FALSE
+pdf("figures/dharma-checks.pdf", width = 7, height = if (show_all_panels) 6 else 2.6)
+par(mfrow = if (show_all_panels) c(length(models), 3) else c(1, length(models)),
+  mar = c(3.4, 3.4, 2, 0.8), mgp = c(2.1, 0.6, 0), cex = 0.7)
 panel <- 0
 for (model in models) {
   pd <- plot_data[[model]]
@@ -102,6 +105,7 @@ for (model in models) {
   abline(0, 1, col = "red")
   title(main = paste0("(", letters[panel], ") ", model, ": QQ residuals"),
     adj = 0, cex.main = 0.85)
+  if (!show_all_panels) next
   panel <- panel + 1
   hist(pd$disp_sim, breaks = 20, col = "grey85", border = "grey60",
     xlim = range(pd$disp_sim, pd$disp_obs), main = "",

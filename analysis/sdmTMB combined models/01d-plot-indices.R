@@ -38,18 +38,19 @@ ind_depth <- bind_rows(
   ungroup()
 
 dodge <- position_dodge(width = 0.5)
+depth_cols <- c(shallow = "#d8b365", deep = "#5ab4ac") # deep = darker
 g_depth <- ind_depth |>
   mutate(est2 = est / gmean, lwrc = lwr / gmean, uprc = upr / gmean) |>
   ggplot(aes(year, est2, ymin = lwrc, ymax = uprc, colour = loc, fill = loc)) +
-  geom_hline(yintercept = 1, colour = "grey70", linewidth = 0.3) +
-  geom_linerange(linewidth = 0.4, alpha = 0.7, position = dodge) +
-  geom_line(aes(group = loc), linewidth = 0.4, alpha = 0.7, position = dodge) +
-  geom_point(size = 1.4, shape = 21, colour = "white", stroke = 0.3, position = dodge) +
-  scale_colour_manual(values = c("#d8b365", "#5ab4ac")) +
-  scale_fill_manual(values = c("#d8b365", "#5ab4ac")) +
-  labs(x = "Year", y = "Abundance index (relative to geometric mean)", colour = "Depth bin", fill = "Depth bin") +
+  geom_linerange(position = dodge) +
+  geom_line(aes(group = loc), position = dodge) +
+  geom_point(shape = 21, colour = "white", position = dodge, size = 2) +
+  scale_colour_manual(values = depth_cols, breaks = c("shallow", "deep")) +
+  scale_fill_manual(values = depth_cols, breaks = c("shallow", "deep")) +
+  labs(x = "Year", y = "Abundance index", colour = "Depth bin", fill = "Depth bin") +
   scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
-  theme_sleek(base_size = 9) +
+  theme_sleek() +
+  scale_x_continuous(breaks = seq(2000, 2030, 5)) +
   theme(legend.position = "inside", legend.position.inside = c(0.85, 0.85))
 g_depth
-ggsave("figures/depth-bin-figure.pdf", g_depth, width = 4, height = 3)
+ggsave("figures/depth-bin-figure.pdf", g_depth, width = 5, height = 4)

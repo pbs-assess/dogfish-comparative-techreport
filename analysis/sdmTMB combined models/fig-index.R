@@ -67,7 +67,6 @@ gg2 <- ind_panel %>%
       )
     )
   ) +
-  geom_hline(yintercept = 1, colour = "grey90") +
   guides(colour = "none") +
   ggsidekick::theme_sleek()
 
