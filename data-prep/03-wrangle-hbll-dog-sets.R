@@ -21,7 +21,7 @@ final |>
   print(n = 40) # looks good
 
 # remove two survey years that extended along the west coast VI
-hbll <- filter(hbll, !(latitude < 48.5 & longitude < -123))
+hbll <- filter(hbll, !(latitude < 48.5 & longitude < -123.3))
 hbll <- filter(hbll, !(latitude < 48.75 & longitude < -124.25))
 
 ggplot(hbll) +
