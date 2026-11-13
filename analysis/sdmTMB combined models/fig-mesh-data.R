@@ -4,29 +4,33 @@ hblldog <- readRDS(paste0("figures/sog-model-mesh-", "hblldog", ".rds"))
 hbll <- readRDS(paste0("figures/sog-model-mesh-", "hbll-n-s", ".rds"))
 dog <- readRDS (paste0("figures/sog-model-mesh-", "dog-j-circle", ".rds"))
 
+# panel titles are added to the plots themselves (aligned with the panel, which
+# is fixed-aspect and so narrower than its grid cell) rather than as cowplot labels
+add_title <- function(g, title) {
+  g +
+    ggplot2::labs(title = title) +
+    ggplot2::theme(
+      plot.title.position = "panel",
+      plot.title = ggplot2::element_text(face = "bold", size = 11, hjust = 0)
+    )
+}
+hblldog <- add_title(hblldog, "(a) HBLL & SoG dogfish circle/J-hook")
+hbll <- add_title(hbll, "(b) HBLL")
+dog <- add_title(dog, "(c) SoG dogfish circle/J-hook")
+
 cv <- cowplot::plot_grid(
   hblldog, hbll,
   ncol = 1,
   nrow = 2,
-  labels = c("(a) HBLL & SoG dogfish circle/J-hook", "(b) HBLL"),   # Labels for each plot
-  #align = "hv",
-  hjust = 0,
-
-  rel_heights = c(1,1),
-  rel_widths = rep(1,1)
+  rel_heights = c(1, 1)
 )
-cv
 
 cv2 <- cowplot::plot_grid(
   cv, dog,
   ncol = 1,
   nrow = 2,
-  hjust = 0,
-  labels = c(" ", "(c) SoG dogfish circle/J-hook"),
-  #align = "hv",
-  rel_heights = c(1,0.56),
-  rel_widths = rep(1,1)
+  rel_heights = c(1, 0.56)
 )
 cv2
 
-ggplot2::ggsave(paste0("figures/mesh_points.png"), cv2, height = 10, width = 7, dpi = 200)
+ggplot2::ggsave("figures/mesh_points.png", cv2, height = 10, width = 7, dpi = 200, bg = "white")
