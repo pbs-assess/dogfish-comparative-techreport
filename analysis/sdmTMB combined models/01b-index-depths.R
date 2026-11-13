@@ -141,45 +141,13 @@ md$sd_report
 index <- get_index(ms, newdata = gridshallow, offset = rep(0, nrow(gridshallow)),
   derived_link = "log", bias_correct = TRUE)
 index$loc <- "shallow"
-index <- index |>
-  mutate(mean = mean(est), meanlwr = mean(lwr), meanupr = mean(upr))
 
 saveRDS(index, "output/ind-depth-bin-shallow.rds")
 
 index_d <- get_index(md, newdata = griddeep, offset = rep(0, nrow(griddeep)),
   derived_link = "log", bias_correct = TRUE)
 index_d$loc <- "deep"
-index_d <- index_d |>
-  mutate(mean = mean(est), meanlwr = mean(lwr), meanupr = mean(upr))
 
 saveRDS(index_d, "output/ind-depth-bin-deep.rds")
 
-index2 <- bind_rows(index, index_d)
-
-index2 |>
-  group_by(loc) |>
-  #mutate(est2 = est - est[depth_m == min(depth_m)]) |>
-  mutate(est2 = est - mean) |>
-  mutate(est2 = est - mean, lwrc = lwr - mean, uprc = upr - mean) |>
-  ggplot() +
-  geom_line(aes(year, (est2), group = loc, colour = loc)) +
-  geom_pointrange(mapping = aes(x = year, y = est2, ymin = (lwrc), ymax = (uprc),  group = loc, colour = loc), size = 0.2, pch = 5, alpha = 0.6, position = position_dodge(width = 0.5)) +
-  scale_colour_viridis_d() +
-  theme_classic()
-
-index2 |>
-  group_by(loc) |>
-  #mutate(est2 = est - est[depth_m == min(depth_m)]) |>
-  mutate(est2 = est - mean, lwrc = lwr - mean, uprc = upr - mean) |>
-  ggplot(aes(year, (est2), ymin = (lwrc), ymax = (uprc), group = loc, colour = loc)) +
-  geom_line(aes(year, (est2), group = loc, colour = loc)) +
-  geom_pointrange(mapping = aes(x = year - 0.25), size = 1, pch = 5, alpha = 0.6, position = position_dodge(width = 0.5)) +
-  scale_colour_manual(values = c("#d8b365", "#5ab4ac")) +
-  guides(colour = guide_legend(title = "Depth bin")) +
-  theme_classic() +
-  ylab("Abundance index") +
-  #guides(colour = "Depth bin") +
-  xlab("Year")
-ggsave("figures/depth-bin-figure.jpg", width = 4, height = 3)
-
-
+# plots: see 01d-plot-indices.R

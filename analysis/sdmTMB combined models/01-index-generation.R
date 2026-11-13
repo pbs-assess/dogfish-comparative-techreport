@@ -268,12 +268,4 @@ index <- index |> mutate(model = ifelse(year %in% unique(d$year), "yrs_surved", 
 index$modelloc <- model
 index$type <- "int"
 saveRDS(index, file = paste0("data-generated/ind-sog-intonly", model, ".rds"))
-
-ggplot(index, aes(as.factor(year), (est), ymin = (lwr), ymax = (upr))) +
-  geom_pointrange(position = position_dodge(width = 0.25)) +
-  theme_classic()
-
-ggplot(filter(index, model == "yrs_surved"), aes(as.factor(year), (est), ymin = (lwr), ymax = (upr))) +
-  geom_pointrange(position = position_dodge(width = 0.25)) +
-  theme_classic()
 }
