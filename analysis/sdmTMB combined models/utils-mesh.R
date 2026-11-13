@@ -8,7 +8,7 @@
 # effects. The outer triangles only carry that buffer, so they can be much
 # coarser (outer_edge) than the inner ones. Coordinates are UTM km.
 
-make_survey_mesh <- function(d, grid, max_edge = 6, outer_edge = 30,
+make_survey_mesh <- function(d, grid, max_edge = 5, outer_edge = 30,
                              outer = 40, convex = 4,
                              xy_cols = c("UTM.lon", "UTM.lat")) {
   xy <- as.matrix(d[, xy_cols])
