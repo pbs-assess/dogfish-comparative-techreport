@@ -50,6 +50,7 @@ g_depth <- ind_depth |>
   labs(x = "Year", y = "Abundance index", colour = "Depth bin", fill = "Depth bin") +
   scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
   theme_sleek() +
+  theme(panel.grid.major = element_line(colour = "grey90", linewidth = 0.3)) +
   scale_x_continuous(breaks = seq(2000, 2030, 5)) +
   theme(legend.position = "inside", legend.position.inside = c(0.85, 0.85))
 g_depth

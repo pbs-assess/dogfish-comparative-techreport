@@ -54,7 +54,7 @@ gg2 <- ind_panel %>%
   geom_point(data = filter(ind_panel, model == "yrs_interp"), aes(group = modelloc), colour = "grey80", size = 2) +
   geom_pointrange(data = filter(ind_panel, model == "yrs_interp"), position = position_dodge(width = 0.25), colour = "grey80") +
   geom_pointrange(data = filter(ind_panel, model == "yrs_surved"), position = position_dodge(width = 0.25)) +
-  expand_limits(y = 0) +
+  scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
   scale_fill_manual(values = x[c(4, 7, 2)]) +
   scale_colour_manual(values = x[c(4, 7, 2)]) +
   labs(x = "Year", y = "Relative abundance index") +
@@ -68,8 +68,9 @@ gg2 <- ind_panel %>%
     )
   ) +
   guides(colour = "none") +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek() +
+  theme(panel.grid.major = element_line(colour = "grey90", linewidth = 0.3))
 
 gg2
 
-ggsave("figures/stitched_indexes_panel.pdf", gg2, width = 4, height = 9)
+ggsave("figures/stitched_indexes_panel.pdf", gg2, width = 4, height = 8)
