@@ -109,7 +109,6 @@ ggplot(final3, aes(catch_count_dog, catch_count_hbll, group = depth_bin, colour 
   geom_point() +
   geom_abline()
 
-weight <- exp(final3$offset)
 dummy_mesh <- sdmTMB::make_mesh(final3, c("UTM.lon", "UTM.lat"), n_knots = 10)
 
 final3$grouping_desc <- as.factor(final3$grouping_desc)
@@ -120,12 +119,12 @@ mdepthb <- sdmTMB(
   spatial = "off",
   spatiotemporal = "off",
   data = final3,
-  offset = final3$offset,
+  offset = final3$offset, # log(hooks_HBLL / hooks_dog)
   family = binomial(),
   control = sdmTMBcontrol(multiphase = FALSE)
 )
 
-mdepthbb <- update(mdepthb, family = betabinomial(), weights = weight)
+mdepthbb <- update(mdepthb, family = betabinomial())
 
 AIC(mdepthbb)
 AIC(mdepthb)
@@ -149,12 +148,12 @@ intbb <- sdmTMB(
   spatial = "off",
   spatiotemporal = "off",
   data = final3,
-  weights = weight,
+  offset = final3$offset,
   family = betabinomial(),
   control = sdmTMBcontrol(multiphase = FALSE)
 )
 
-intb <- update(intbb, family = binomial(), offset = final3$offset)
+intb <- update(intbb, family = binomial())
 
 AIC(intbb)
 AIC(intb)

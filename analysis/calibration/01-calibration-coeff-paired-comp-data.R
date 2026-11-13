@@ -45,25 +45,24 @@ depth <- samps |>
   rename(offset_HBLL = "offset_HBLL_13/0", offset_Dog = "offset_Dog_14/0") |>
   rename(catch_count_HBLL = "catch_count_HBLL_13/0", catch_count_Dog = "catch_count_Dog_14/0") |>
   mutate(
-    offset_log = log(offset_HBLL) - log(offset_Dog),
-    weight = (offset_HBLL) / (offset_Dog)
+    # logit(HBLL / (HBLL + Dog)) = log(rho) + log(hooks_HBLL / hooks_Dog), so the
+    # hook ratio enters as an offset (not as weights); rho is the HBLL:dog catch ratio
+    offset_log = log(offset_HBLL) - log(offset_Dog)
   )
 
 
 # intercept only model ----------------------------------------------------
-weight <- depth$weight
-
 mintbb <- sdmTMB(
   cbind(catch_count_HBLL, catch_count_Dog) ~ 1,
   spatial = "off",
   spatiotemporal = "off",
   data = depth,
   family = betabinomial(),
-  weights = weight,
+  offset = depth$offset_log,
   control = sdmTMBcontrol(multiphase = FALSE)
 )
 
-mintb <- update(mintbb, family = binomial(), offset = depth$offset_log)
+mintb <- update(mintbb, family = binomial())
 
 mintqb <- glm(
   formula = cbind(catch_count_HBLL, catch_count_Dog) ~ 1 + offset(offset_log),
@@ -95,11 +94,11 @@ depthmbb <- sdmTMB(
   spatiotemporal = "off",
   data = depth,
   family = betabinomial(),
-  weights = weight,
+  offset = depth$offset_log,
   control = sdmTMBcontrol(multiphase = FALSE)
 )
 
-depthmb <- update(depthmbb, family = binomial(), offset = depth$offset_log)
+depthmb <- update(depthmbb, family = binomial())
 
 # check disperson
 pearson_chisq <- sum(residuals(depthmb, type = "pearson")^2)
