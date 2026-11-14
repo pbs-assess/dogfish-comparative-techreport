@@ -84,7 +84,7 @@ g <- ggplot(cal, aes(estimate, survey,
   facet_wrap(~panel, scales = "free_x") +
   scale_colour_manual(values = unname(x[c(4, 7, 2)]), guide = "none") +
   scale_shape_manual(values = c(16, 17, 15)) +
-  scale_x_log10(breaks = c(0.8, 1, 1.25, 1.5, 2, 3)) +
+  scale_x_log10(breaks = c(0.4, 0.5, 0.6, 0.8, 1, 1.25, 1.5, 2, 3)) +
   labs(x = "Catchability ratio", y = NULL, shape = NULL) +
   ggsidekick::theme_sleek() +
   theme(legend.position = "bottom") +
