@@ -126,3 +126,7 @@ exp(depthmbb_params$conf.high)
 
 AIC(mintbb)
 AIC(depthmbb)
+
+# save the paired-set coefficients (log scale) for the calibration figure
+saveRDS(tidy(mintbb), "data-generated/calibration_coeffs_paired_intercept.rds")
+saveRDS(tidy(depthmbb), "data-generated/calibration_coeffs_paired_depth.rds")
